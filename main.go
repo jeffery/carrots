@@ -59,7 +59,7 @@ func verifyRecipients(configuration *configuration, rtm *slack.RTM, ev *slack.Me
 			if len(configuration.SelfResponse) > 0 {
 				return nil, errors.New(configuration.SelfResponse[rand.Intn(len(configuration.SelfResponse))])
 			}
-			return nil, errors.New("Is this an onion thing? no patting yourself on the back, kiss-ass")
+			return nil, errors.New("No patting yourself on the back")
 		}
 		// Can only thank real people. Not rubber ducks.
 		_, err := rtm.GetUserInfo(recipient)
