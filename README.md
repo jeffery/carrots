@@ -7,12 +7,11 @@ Golang KudosBot for Slack
 * Setup the Bots app for you slack workspace: <https://app.slack.com/apps/A0F7YS25R-bots?next_id=0>, save the token somewhere secret
 * Create the MySQL db, I have included the commands I used
 * Update the carrots.json file
-* Build the app
+* Build the app from the repo working directory
 
     ```sh
-    go get github.com/rgarth/carrots
-    go build github.com/rgarth/carrots
-    cp $GOPATH/src/github.com/rgarth/carrots/carrots.json ./
+    go get
+    go build 
     ```
 
 * Run the app
