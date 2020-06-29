@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"regexp"
 	"strings"
@@ -18,15 +19,18 @@ import (
 
 // Configuration values that can be set
 type configuration struct {
-	Emoji      string
-	Plural     string
-	DBHost     string
-	DBPort     int
-	DBName     string
-	DBUser     string
-	DBPass     string
-	SlackToken string
-	Limit      int
+	Emoji         string
+	Plural        string
+	DBHost        string
+	DBPort        int
+	DBName        string
+	DBUser        string
+	DBPass        string
+	SlackToken    string
+	Limit         int
+	KudosResponse []string
+	HelpResponse  []string
+	SelfResponse  []string
 }
 
 type userStats struct {
@@ -52,13 +56,16 @@ func verifyRecipients(configuration *configuration, rtm *slack.RTM, ev *slack.Me
 
 		// Can't give yourself points
 		if recipient == ev.User {
-			return nil, errors.New("no patting yourself on the back")
+			if len(configuration.SelfResponse) > 0 {
+				return nil, errors.New(configuration.SelfResponse[rand.Intn(len(configuration.SelfResponse))])
+			}
+			return nil, errors.New("Is this an onion thing? no patting yourself on the back, kiss-ass")
 		}
 		// Can only thank real people. Not rubber ducks.
 		_, err := rtm.GetUserInfo(recipient)
 
 		if err != nil {
-			errResp := fmt.Sprintf("can't find %s to give them any %s", s, configuration.Plural)
+			errResp := fmt.Sprintf("Who?")
 			return nil, errors.New(errResp)
 		}
 
@@ -270,6 +277,9 @@ Loop:
 								// Acknowledge the carrots
 								var botResp string
 								log.Printf("%s sent %d %s to %d verified users\n", sender.Profile.RealName, len(carrots), configuration.Plural, len(verified))
+								if len(configuration.KudosResponse) > 0 {
+									botResp = configuration.KudosResponse[rand.Intn(len(configuration.KudosResponse))]
+								}
 								for i := 0; i < (len(carrots) * len(verified)); i++ {
 									botResp = fmt.Sprintf("%s :%s:", botResp, configuration.Emoji)
 								}
@@ -338,11 +348,12 @@ Loop:
 
 					default:
 						user := slack.MsgOptionAsUser(true)
-						helpStr := fmt.Sprintf("*Send %s to your peers:*", configuration.Plural) +
-							fmt.Sprintf("\n>Hey @ringo have some :%s: :%s: for your hard work",
+						helpStr := fmt.Sprintf("*Send %s to your friends:*", configuration.Plural) +
+							fmt.Sprintf("\n>Hey @shrek, I like you, have a :%s:",
+								configuration.Emoji) +
+							fmt.Sprintf("\n>:%s: @shrek @fiona", configuration.Emoji) +
+							fmt.Sprintf("\n>I like that @boulder, it's a nice boulder :%s: :%s:",
 								configuration.Emoji, configuration.Emoji) +
-							fmt.Sprintf("\n>:%s: @paul @john", configuration.Emoji) +
-							fmt.Sprintf("\n>Thanks for you help today @george, have a :%s:", configuration.Emoji) +
 							fmt.Sprintf("\n*Other stuff:*") +
 							fmt.Sprintf("\n>`@%s me` Find out how many :%s: you have",
 								info.User.Name, configuration.Emoji) +
@@ -352,6 +363,10 @@ Loop:
 						if configuration.Limit != -1 {
 							helpStr = helpStr + fmt.Sprintf("\nYou can send a total of *%d* %s per month",
 								configuration.Limit, configuration.Plural)
+						}
+						if len(configuration.HelpResponse) > 0 {
+							helpStr = helpStr + fmt.Sprintf("\n%s",
+								configuration.HelpResponse[rand.Intn(len(configuration.HelpResponse))])
 						}
 						text := slack.MsgOptionText(helpStr, false)
 						rtm.PostEphemeral(ev.Channel, sender.ID, text, user)
