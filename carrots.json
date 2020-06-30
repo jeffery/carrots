@@ -1,10 +1,10 @@
 {
     "Emoji": "carrot",
     "Plural": "carrots",
-    "DBHost": "127.0.0.1",
+    "DBHost": "kudos-mariadb.sre.svc.cluster.local",
     "DBPort": 3306,
-    "DBName": "carrots",
-    "DBUser": "carrots",
+    "DBName": "kudos",
+    "DBUser": "kudos",
     "Limit": 30,
     "KudosResponse": [
         "I like that carrot, that's a nice carrot.",
