@@ -148,7 +148,7 @@ func getStats(configuration *configuration, user string, monthStr string) (userS
 	}
 	rcvd := `select COUNT(recipient) FROM kudos_log WHERE MONTHNAME(timestamp) = "` + monthStr +
 		`" AND timestamp > DATE_SUB(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 11 MONTH)` +
-		` AND TRIM(sender) = "` + user + `"`
+		` AND TRIM(recipient) = "` + user + `"`
 	rcvQuery, rcvErr := db.Query(rcvd)
 	if rcvErr != nil {
 		return stats, rcvErr
