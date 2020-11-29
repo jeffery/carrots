@@ -47,7 +47,7 @@ func getenv(name string) string {
 	return v
 }
 
-func verifyRecipients(configuration *configuration, rtm *slack.RTM, ev *slack.MessageEvent, recipients []string) ([]string, error) {
+func verifyRecipients(configuration *configuration, rtm *slack.RTM, ev *slack.MessageEvent, recipients []string, botUserID string) ([]string, error) {
 	// Check is recipients re valid
 	var verified []string
 	for _, s := range recipients {
@@ -60,6 +60,10 @@ func verifyRecipients(configuration *configuration, rtm *slack.RTM, ev *slack.Me
 				return nil, errors.New(configuration.SelfResponse[rand.Intn(len(configuration.SelfResponse))])
 			}
 			return nil, errors.New("No patting yourself on the back")
+		}
+		// DO NOT FEED THE DONKEY
+		if recipient == botUserID {
+			return nil, errors.New("PLEASE DO NOT FEED THE DONKEY")
 		}
 		// Can only thank real people. Not rubber ducks.
 		_, err := rtm.GetUserInfo(recipient)
@@ -257,7 +261,8 @@ Loop:
 
 				if ev.User != info.User.ID && len(carrots) > 0 && len(recipients) > 0 {
 					// verify recipients are valid
-					verified, err := verifyRecipients(&configuration, rtm, ev, recipients)
+					strings.ToLower(info.User.ID)
+					verified, err := verifyRecipients(&configuration, rtm, ev, recipients, info.User.ID)
 
 					if err != nil {
 						rtm.SendMessage(rtm.NewOutgoingMessage(err.Error(), ev.Channel))
