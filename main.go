@@ -28,6 +28,7 @@ type configuration struct {
 	DBPass        string
 	SlackToken    string
 	Limit         int
+	PerUserLimit  int
 	KudosResponse []string
 	HelpResponse  []string
 	SelfResponse  []string
@@ -223,8 +224,8 @@ func main() {
 	// default emoji overwritten by config file
 	configuration.Emoji = "carrot"
 	configuration.Plural = "carrots"
-	configuration.Limit = -1 // default here is no monthly kudos limit
-
+	configuration.Limit = -1        // default here is no monthly kudos limit
+	configuration.PerUserLimit = -1 // default is no limit to per user in action
 	err := gonfig.GetConf("./carrots.json", &configuration)
 	if err != nil {
 		panic(err)
@@ -284,6 +285,11 @@ Loop:
 								haveBudget = false
 							}
 						}
+						if configuration.PerUserLimit != -1 {
+							if len(carrots) > configuration.PerUserLimit {
+								haveBudget = false
+							}
+						}
 						if haveBudget == true && lookupError == nil {
 							//save to db
 							err := storeKudos(&configuration, sender.ID, verified, len(carrots))
@@ -309,11 +315,19 @@ Loop:
 								rtm.AddReaction("heart", slack.ItemRef{ev.Channel, ev.Timestamp, "", ""})
 							}
 						} else if lookupError == nil {
-							rtm.SendMessage(rtm.NewOutgoingMessage(
-								fmt.Sprintf("Thanks for sharing the :%s:, unfortunately you can't send more than %d in a month",
-									configuration.Emoji, configuration.Limit),
-								ev.Channel))
+							if len(carrots) > configuration.PerUserLimit {
+								rtm.SendMessage(rtm.NewOutgoingMessage(
+									fmt.Sprintf("Thanks for sharing the :%s:, unfortunately you can't send more than %d in a message",
+										configuration.Emoji, configuration.PerUserLimit),
+									ev.Channel))
+							} else {
+								rtm.SendMessage(rtm.NewOutgoingMessage(
+									fmt.Sprintf("Thanks for sharing the :%s:, unfortunately you can't send more than %d in a month",
+										configuration.Emoji, configuration.Limit),
+									ev.Channel))
+							}
 						}
+
 					}
 
 				} else if atCmd != nil {
