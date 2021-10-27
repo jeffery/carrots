@@ -24,7 +24,9 @@ Golang KudosBot for Slack
 
 ## Configuration
 
-All config options are in `carrots.json`. "Limits", is the number of emoji a user can send in a calendar month, `-1` removes the limit
+* All config options are in `carrots.json`. 
+* "Limits", is the number of emoji a user can send in a calendar month, `-1` removes the limit
+* "PerUserLimit" is the number of emoji a user can send per message, `-1` removes the limit 
 
 ## Usage
 

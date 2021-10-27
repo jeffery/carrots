@@ -6,6 +6,7 @@
     "DBName": "kudos",
     "DBUser": "kudos",
     "Limit": 30,
+    "PerUserLimit": 3,
     "KudosResponse": [
         "I like that carrot, that's a nice carrot.",
         "All right, all right, that's enough. No one likes a kiss-ass.",
